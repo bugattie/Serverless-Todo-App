@@ -7,5 +7,9 @@
   "private": true,
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "apollo-server-lambda": "^2.25.2",
+    "graphql": "^14.7.0"
+  }
 }
