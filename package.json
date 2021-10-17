@@ -1,0 +1,11 @@
+{
+  "name": "gatsby-starter-hello-world",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "bugattie",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}
