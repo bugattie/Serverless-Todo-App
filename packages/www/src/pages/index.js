@@ -1,22 +1,42 @@
 import {
   Button,
-  Checkbox,
-  Close,
   Container,
   Flex,
   Heading,
-  Label,
   MenuButton,
-  Text,
+  Spinner,
 } from "@theme-ui/components";
 import { Box } from "theme-ui";
 import "../styles/global.scss";
 import * as homeStyles from "../styles/home.module.scss";
 import Swal from "sweetalert2";
+import TodoItem from "../components/TodoItem";
+import { useQuery, useMutation, gql } from "@apollo/client";
 
 const React = require("react");
 
+export const getTodo = gql`
+  {
+    todos {
+      id
+      text
+      done
+    }
+  }
+`;
+
+const addTodoMutation = gql`
+  mutation addTodo($text: String!) {
+    addTodo(text: $text) {
+      text
+    }
+  }
+`;
+
 const Home = () => {
+  const { loading, data, error } = useQuery(getTodo);
+  const [addTodo] = useMutation(addTodoMutation);
+
   const openForm = async () => {
     const { value: ipAddress } = await Swal.fire({
       title: "Todo Description",
@@ -31,10 +51,27 @@ const Home = () => {
     });
 
     if (ipAddress) {
-      Swal.fire(`Your IP address is ${ipAddress}`);
+      addTodo({
+        variables: {
+          text: ipAddress,
+        },
+        refetchQueries: [{ query: getTodo }],
+      });
     }
   };
 
+  if (loading) {
+    return <Spinner />;
+  }
+
+  if (error) {
+    return Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: "Something went wrong!",
+    });
+  }
+  console.log(data);
   return (
     <Container className={homeStyles.container}>
       <Flex sx={{ flexDirection: "column" }}>
@@ -44,28 +81,31 @@ const Home = () => {
             <Heading as="h1" sx={{ textAlign: "center", flex: "50%" }}>
               Get Stuff Done
             </Heading>
+
+            <div sx={{ flex: "50%" }}>
+              <Button
+                className={homeStyles.btn}
+                bg="#e3e9ff"
+                color="#777"
+                onClick={openForm}
+              >
+                + New task
+              </Button>
+            </div>
           </Flex>
         </Box>
 
-        <Box
-          bg="white"
-          color="#AEB8CE"
-          marginTop="3"
-          p="4"
-          className={homeStyles.todo_box}
-        >
-          <Flex sx={{ alignItems: "center", flex: "50%" }}>
-            <Label>
-              <Checkbox defaultChecked={true} />
-              <Text color="#777" sx={{ fontSize: "16px" }}>
-                Hello
-              </Text>
-            </Label>
-            <Close sx={{ flex: "auto", cursor: "pointer" }} />
-          </Flex>
-          <Button className={homeStyles.btn} bg="#AF7EEB" onClick={openForm}>
-            + New task
-          </Button>
+        <Box bg="white" color="#AEB8CE" marginTop="3" p="4">
+          {data.todos.map((todo) => {
+            return (
+              <TodoItem
+                key={todo.id}
+                id={todo.id}
+                text={todo.text}
+                done={todo.done}
+              />
+            );
+          })}
         </Box>
       </Flex>
     </Container>
