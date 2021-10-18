@@ -76,11 +76,9 @@ const resolvers = {
           scheme: "https",
         });
 
-        const result = await client.query(
+        await client.query(
           q.Update(q.Ref(q.Collection("todos"), id), { data: { done: true } })
         );
-
-        return result.data;
       } catch (err) {
         console.log("**** Error ****", err);
       }
@@ -94,11 +92,7 @@ const resolvers = {
           scheme: "https",
         });
 
-        const result = await client.query(
-          q.Delete(q.Ref(q.Collection("todos"), id))
-        );
-
-        return result.data;
+        await client.query(q.Delete(q.Ref(q.Collection("todos"), id)));
       } catch (err) {
         console.log("**** Error ****", err);
       }
