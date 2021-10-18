@@ -21,28 +21,28 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     todos: async (root, args, context) => {
-      //   try {
-      //     const client = new faunadb.Client({
-      //       secret: process.env.FAUNADB_SECRET_KEY,
-      //       domain: "db.us.fauna.com",
-      //       scheme: "https",
-      //     });
-      //     const result = await client.query(
-      //       q.Map(
-      //         q.Paginate(q.Match(q.Index("todoIndex"))),
-      //         q.Lambda((x) => q.Get(x))
-      //       )
-      //     );
-      //     return result.data.map((todo) => {
-      //       return {
-      //         id: todo.ref.id,
-      //         text: todo.data.text,
-      //         done: todo.data.done,
-      //       };
-      //     });
-      //   } catch (err) {
-      //     console.log("**** Error ****", err);
-      //   }
+      try {
+        const client = new faunadb.Client({
+          secret: process.env.FAUNADB_SECRET_KEY,
+          domain: "db.us.fauna.com",
+          scheme: "https",
+        });
+        const result = await client.query(
+          q.Map(
+            q.Paginate(q.Match(q.Index("todoIndex"))),
+            q.Lambda((x) => q.Get(x))
+          )
+        );
+        return result.data.map((todo) => {
+          return {
+            id: todo.ref.id,
+            text: todo.data.text,
+            done: todo.data.done,
+          };
+        });
+      } catch (err) {
+        console.log("**** Error ****", err);
+      }
     },
   },
 
@@ -76,9 +76,11 @@ const resolvers = {
           scheme: "https",
         });
 
-        await client.query(
+        const result = await client.query(
           q.Update(q.Ref(q.Collection("todos"), id), { data: { done: true } })
         );
+
+        return result.data;
       } catch (err) {
         console.log("**** Error ****", err);
       }
@@ -92,7 +94,11 @@ const resolvers = {
           scheme: "https",
         });
 
-        await client.query(q.Delete(q.Ref(q.Collection("todos"), id)));
+        const result = await client.query(
+          q.Delete(q.Ref(q.Collection("todos"), id))
+        );
+
+        return result.data;
       } catch (err) {
         console.log("**** Error ****", err);
       }
